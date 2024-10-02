@@ -1,62 +1,27 @@
 <!DOCTYPE html>
 <html lang="sv">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nichlas Winqvist</title>
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autoscrollande Plattformsspel</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
-    <h1>Nichlas Winqvist</h1>
-    <nav>
-      <ul>
-        <li><a href="#home">Hem</a></li>
-        <li><a href="#about">Om oss</a></li>
-        <li><a href="#services">Tjänster</a></li>
-        <li><a href="#contact">Kontakt</a></li>
-      </ul>
-    </nav>
-  </header>
+    <div id="gameContainer">
+        <canvas id="gameCanvas"></canvas>
+        <div id="scoreBoard">
+            <p>Poäng: <span id="score">0</span></p>
+            <p>Highscore: <span id="highscore">0</span></p>
+        </div>
+        <div id="gameOverMessage">
+            <p>Game Over! Tryck på mellanslag för att starta om.</p>
+        </div>
+        <div id="highscoreList">
+            <h3>Highscorelista</h3>
+            <ul id="highscoreUl"></ul>
+        </div>
+    </div>
 
-  <main>
-    <section id="home">
-      <h2>Välkommen till Nichlas Winqvists webbplats!</h2>
-      <p>Här kan du följa mig och mina härliga äventyr på medieinstitutet.</p>
-    </section>
-
-    <section id="about">
-      <h2>Om mig</h2>
-      <p>Just nu är jag i full flärd för att lära mig att koda och annat som handlar om webbteknik.</p>
-    </section>
-
-    <section id="services">
-      <h2>Tjänster</h2>
-      <p>Du kan inte anlita mig ännu, men så snart som jag är klar med min utbildning finns jag tillgänglig för DIG.</p>
-    </section>
-
-    <section id="contact">
-      <h2>Kontakt</h2>
-      <p>Här kan du ange kontaktinformation och ett formulär för att nå dig.</p>
-      <form id="contact-form">
-        <label for="name">Namn:</label>
-        <input type="text" id="name" name="name" required>
-
-        <label for="email">E-post:</label>
-        <input type="email" id="email" name="email" required>
-
-        <label for="message">Meddelande:</label>
-        <textarea id="message" name="message" required></textarea>
-
-        <button type="submit">Skicka</button>
-      </form>
-    </section>
-  </main>
-
-  <footer>
-    <p>&copy; 2024 Nichlas Winqvist. Alla rättigheter förbehållna.</p>
-  </footer>
-
-  <script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
