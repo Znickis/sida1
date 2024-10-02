@@ -47,18 +47,21 @@ let obstacles = [];
 let platforms = [];
 let powerUps = [];
 let explosions = [];
-let gameSpeed = 4; // Starta med en snabbare spelhastighet
+let gameSpeed = 4;
 let score = 0;
 let highscore = localStorage.getItem('highscore') || 0;
 let gameOver = false;
 
 let highscoreList = JSON.parse(localStorage.getItem('highscoreList')) || [];
+let psychedelicEffectStep = 0; // Steg för att hantera psykedelisk effekt
 
 document.getElementById('highscore').innerText = highscore;
 updateHighscoreList();
 
 // Skapa plattformar
 function createPlatform() {
+    if (platforms.length >= 2) return;
+
     let platform = {
         x: canvas.width,
         y: Math.random() * (canvas.height - 150) + 200,
@@ -70,7 +73,7 @@ function createPlatform() {
 
 // Skapa hinder (hundar)
 function createObstacle() {
-    if (obstacles.length >= 2) return; // Begränsa antalet hinder till max 2 på skärmen
+    if (obstacles.length >= 2) return;
 
     let obstacle = {
         x: canvas.width,
@@ -83,7 +86,7 @@ function createObstacle() {
 
 // Skapa power-ups
 function createPowerUp() {
-    if (powerUps.length >= 2) return; // Begränsa antalet power-ups till max 2 på skärmen
+    if (powerUps.length >= 2) return;
 
     let powerUpType = Math.random() < 0.5 ? 'invincible' : 'giant';
     let powerUp = {
@@ -103,7 +106,7 @@ function createExplosion(x, y) {
         y: y,
         width: 50,
         height: 50,
-        duration: 20, // Varaktighet av explosionen
+        duration: 20,
     };
     explosions.push(explosion);
 }
@@ -121,13 +124,12 @@ function updatePlayer() {
     if (!player.isAlive) return;
 
     if (player.isHoldingJump && player.dy > player.maxJump) {
-        player.dy -= 0.2; // Om mellanslag hålls in, ge extra skjuts uppåt
+        player.dy -= 0.2;
     }
 
     player.dy += player.gravity;
     player.y += player.dy;
 
-    // Se till att spelaren inte går under marken
     if (player.y + player.height >= canvas.height) {
         player.y = canvas.height - player.height;
         player.dy = 0;
@@ -137,16 +139,13 @@ function updatePlayer() {
     ctx.drawImage(catImage, player.x, player.y, player.width, player.height);
 }
 
-// Hantera hinder (hundar)
+// Hantera hinder
 function handleObstacles() {
-    for (let i = 0; i < obstacles.length; i++) {
-        let obstacle = obstacles[i];
+    obstacles.forEach((obstacle, index) => {
         obstacle.x -= gameSpeed;
 
-        // Rita hinder
         ctx.drawImage(dogImage, obstacle.x, obstacle.y, obstacle.width, obstacle.height);
 
-        // Kollision mellan spelaren och hinder
         if (!player.isInvincible && detectCollision(player, obstacle) && player.isAlive) {
             player.isAlive = false;
             deathSound.play();
@@ -154,53 +153,43 @@ function handleObstacles() {
             handleGameOver();
         }
 
-        // Ta bort hinder som lämnar skärmen
         if (obstacle.x + obstacle.width < 0) {
-            obstacles.splice(i, 1);
-            i--;
+            obstacles.splice(index, 1);
         }
-    }
+    });
 }
 
 // Hantera plattformar
 function handlePlatforms() {
-    for (let i = 0; i < platforms.length; i++) {
-        let platform = platforms[i];
+    platforms.forEach((platform, index) => {
         platform.x -= gameSpeed;
 
-        // Rita plattform
         ctx.fillStyle = '#654321';
         ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
 
-        // Kollision mellan spelaren och plattform
         if (player.dy > 0 && detectCollision(player, platform)) {
             player.y = platform.y - player.height;
             player.dy = 0;
             player.isJumping = false;
         }
 
-        // Ta bort plattformar som lämnar skärmen
         if (platform.x + platform.width < 0) {
-            platforms.splice(i, 1);
-            i--;
+            platforms.splice(index, 1);
         }
-    }
+    });
 }
 
 // Hantera power-ups
 function handlePowerUps() {
-    for (let i = 0; i < powerUps.length; i++) {
-        let powerUp = powerUps[i];
+    powerUps.forEach((powerUp, index) => {
         powerUp.x -= gameSpeed;
 
-        // Rita power-up
         if (powerUp.type === 'invincible') {
             ctx.drawImage(powerUpInvincibleImage, powerUp.x, powerUp.y, powerUp.width, powerUp.height);
         } else if (powerUp.type === 'giant') {
             ctx.drawImage(powerUpGiantImage, powerUp.x, powerUp.y, powerUp.width, powerUp.height);
         }
 
-        // Kollision mellan spelaren och power-up
         if (detectCollision(player, powerUp) && player.isAlive) {
             if (powerUp.type === 'invincible') {
                 player.isInvincible = true;
@@ -215,31 +204,38 @@ function handlePowerUps() {
                     player.height = 40;
                 }, 5000);
             }
-            powerUps.splice(i, 1);
-            i--;
+            powerUps.splice(index, 1);
         }
-    }
+    });
 }
 
 // Hantera explosioner
 function handleExplosions() {
-    for (let i = 0; i < explosions.length; i++) {
-        let explosion = explosions[i];
+    explosions.forEach((explosion, index) => {
         ctx.drawImage(explosionImage, explosion.x, explosion.y, explosion.width, explosion.height);
         explosion.duration--;
 
-        // Ta bort explosioner när de är klara
         if (explosion.duration <= 0) {
-            explosions.splice(i, 1);
-            i--;
+            explosions.splice(index, 1);
         }
-    }
+    });
+}
+
+// Psykedelisk effekt
+function psychedelicEffect() {
+    psychedelicEffectStep += 0.02;
+    let red = Math.floor(128 + 128 * Math.sin(psychedelicEffectStep));
+    let green = Math.floor(128 + 128 * Math.sin(psychedelicEffectStep + 2));
+    let blue = Math.floor(128 + 128 * Math.sin(psychedelicEffectStep + 4));
+    canvas.style.backgroundColor = `rgb(${red}, ${green}, ${blue})`;
 }
 
 // Spelets huvudloop
 function gameLoop() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     if (!gameOver) {
+        psychedelicEffect(); // Använd psykedelisk effekt
+
         updatePlayer();
         handleObstacles();
         handlePlatforms();
@@ -260,7 +256,7 @@ function gameLoop() {
         // Uppdatera poäng och öka spelhastigheten
         score++;
         if (score % 100 === 0) {
-            gameSpeed += 0.5; // Öka hastigheten var hundrade poäng
+            gameSpeed += 0.5;
         }
         document.getElementById('score').innerText = score;
 
@@ -273,14 +269,13 @@ function handleGameOver() {
     document.getElementById('gameOverMessage').style.display = 'block';
     gameOver = true;
 
-    // Spara highscore och uppdatera highscorelistan
     if (score > highscore) {
         highscore = score;
         localStorage.setItem('highscore', highscore);
     }
     highscoreList.push(score);
     highscoreList.sort((a, b) => b - a);
-    highscoreList = highscoreList.slice(0, 5);  // Behåll topp 5
+    highscoreList = highscoreList.slice(0, 5);
     localStorage.setItem('highscoreList', JSON.stringify(highscoreList));
 
     updateHighscoreList();
@@ -318,7 +313,7 @@ function resetGame() {
     platforms = [];
     powerUps = [];
     explosions = [];
-    gameSpeed = 4; // Återställ startvärdet för spelhastigheten
+    gameSpeed = 4;
     score = 0;
     gameOver = false;
     document.getElementById('gameOverMessage').style.display = 'none';
@@ -333,7 +328,7 @@ document.addEventListener('keydown', function (e) {
         } else if (!player.isJumping && player.isAlive) {
             player.isJumping = true;
             player.dy = player.jumpPower;
-            player.isHoldingJump = true;  // Håller koll om spelaren håller in knappen
+            player.isHoldingJump = true;
             jumpSound.play();
         }
     }
@@ -341,7 +336,7 @@ document.addEventListener('keydown', function (e) {
 
 document.addEventListener('keyup', function (e) {
     if (e.code === 'Space') {
-        player.isHoldingJump = false;  // När mellanslag släpps
+        player.isHoldingJump = false;
     }
 });
 
